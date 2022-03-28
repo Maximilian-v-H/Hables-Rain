@@ -1,0 +1,67 @@
+Mean(MinTemp): 12.194034
+Median(MinTemp): 12.000000
+Standard deviation(MinTemp): 6.398495
+
+Mean(MaxTemp): 23.221348
+Median(MaxTemp): 22.600000
+Standard deviation(MaxTemp): 7.119049
+
+#########################################################
+#							#	
+#	Mean(Rainfall): 2.360918			#
+#	Median(Rainfall): 0.000000			#
+#	Standard deviation(Rainfall): 8.478060		#
+#							#
+#########################################################
+
+Mean(Evaporation): 5.468232
+Median(Evaporation): 4.800000
+Standard deviation(Evaporation): 4.193704
+
+Mean(Sunshine): 7.611178
+Median(Sunshine): 8.400000
+Standard deviation(Sunshine): 3.785483
+
+Mean(WindGustSpeed): 40.035230
+Median(WindGustSpeed): 39.000000
+Standard deviation(WindGustSpeed): 13.607062
+
+Mean(WindSpeed9am): 14.043426
+Median(WindSpeed9am): 13.000000
+Standard deviation(WindSpeed9am): 8.915375
+
+Mean(WindSpeed3pm): 18.662657
+Median(WindSpeed3pm): 19.000000
+Standard deviation(WindSpeed3pm): 8.809800
+
+Mean(Humidity9am): 68.880831
+Median(Humidity9am): 70.000000
+Standard deviation(Humidity9am): 19.029164
+
+Mean(Humidity3pm): 51.539116
+Median(Humidity3pm): 52.000000
+Standard deviation(Humidity3pm): 20.795902
+
+Mean(Pressure9am): 1017.649940
+Median(Pressure9am): 1017.600000
+Standard deviation(Pressure9am): 7.106530
+
+Mean(Pressure3pm): 1015.255889
+Median(Pressure3pm): 1015.200000
+Standard deviation(Pressure3pm): 7.037414
+
+Mean(Cloud9am): 4.447439
+Median(Cloud9am): 5.000000
+Standard deviation(Cloud9am): 2.887128
+
+Mean(Cloud3pm): 4.509918
+Median(Cloud3pm): 5.000000
+Standard deviation(Cloud3pm): 2.720340
+
+Mean(Temp9am): 16.990631
+Median(Temp9am): 16.700000
+Standard deviation(Temp9am): 6.488753
+
+Mean(Temp3pm): 21.683390
+Median(Temp3pm): 21.100000
+Standard deviation(Temp3pm): 6.936650
