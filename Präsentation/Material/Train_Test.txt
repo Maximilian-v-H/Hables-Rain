@@ -1,0 +1,2 @@
+Trainingsdata: 75%
+Testdata: 25%

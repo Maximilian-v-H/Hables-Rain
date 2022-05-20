@@ -51,6 +51,8 @@ summary(df)
 
 ###### DESKRIPTIVE DATEN ANALYSE #########
 
+# Metrics
+
 parameters <- names(select_if(df, is.numeric))
 
 for (x in parameters) {
@@ -58,3 +60,10 @@ for (x in parameters) {
   printf("Median(%s): %f\n", x, median(df[, x], na.rm = TRUE))
   printf("Standard deviation(%s): %f\n\n", x, sd(df[, x], na.rm = TRUE))S
 }
+
+# Graphical
+par(mfrow=c(4,4))
+for (x in parameters) {
+  boxplot(df[, x],main=x)
+}
+
