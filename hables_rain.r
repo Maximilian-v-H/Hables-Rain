@@ -1,3 +1,4 @@
+#!/bin/Rscript
 library("R.utils")
 library("dplyr")
 library("plyr")
@@ -9,8 +10,9 @@ library("Amelia")
 library("mlbench")
 library("corrplot")
 library('ANN2')
+library('randomForest')
 
-df <- read.csv("../input/weather-dataset-rattle-package/weatherAUS.csv", header = TRUE, sep = ",", fill = TRUE)
+df <- read.csv("./data/weatherAUS.csv", header = TRUE, sep = ",", fill = TRUE)
 
 n <- length(df[,1]) 
 index <- sample(1:n,n,replace=FALSE) 
@@ -77,7 +79,7 @@ corrplot(correlations, method="circle")
 ### Daten splitten in Test- und Trainingsdatensätze
 
 ## 75% of the sample size
-smp_size <- floor(0.75 * nrow(dfmin))  ## set the seed to make your partition reproducible 
+smp_size <- floor(0.95 * nrow(dfmin))  ## set the seed to make your partition reproducible 
 set.seed(123) 
 train_ind <- sample(seq_len(nrow(dfmin)), size = smp_size)  
 train <- dfmin[train_ind, ] 
@@ -88,24 +90,45 @@ summary(train)
 
 ### Lineare Regression
 
-model <- glm(RainTomorrow~Date+Location+MinTemp+MaxTemp+Rainfall+Evaporation+Sunshine+WindGustDir+WindGustSpeed+WindDir9am+WindDir3pm+WindSpeed9am+WindSpeed3pm+Humidity9am+Humidity3pm+Pressure9am+Pressure3pm+Cloud9am+Cloud3pm+Temp9am+Temp3pm+RainToday, data = train, family = binomial)
-print(model)
-
-summary(model)
-
-glm.probs <- predict(model, newdata = test, type = "response")
-glm.probs[1:5]
-
-glm.pred <- ifelse(glm.probs > 0.5, "Yes", "No")
-
-test.RainTomorrow = test$RainTomorrow
-table(glm.pred,test.RainTomorrow)
-
-mean(glm.pred == test.RainTomorrow)
+# model <- glm(RainTomorrow~Date+Location+MinTemp+MaxTemp+Rainfall+Evaporation+Sunshine+WindGustDir+WindGustSpeed+WindDir9am+WindDir3pm+WindSpeed9am+WindSpeed3pm+Humidity9am+Humidity3pm+Pressure9am+Pressure3pm+Cloud9am+Cloud3pm+Temp9am+Temp3pm+RainToday, data = train, family = binomial)
+# print(model)
+# 
+# summary(model)
+# 
+# glm.probs <- predict(model, newdata = test, type = "response")
+# glm.probs[1:5]
+# 
+# glm.pred <- ifelse(glm.probs > 0.5, "Yes", "No")
+# 
+# test.RainTomorrow = test$RainTomorrow
+# table(glm.pred,test.RainTomorrow)
+# 
+# mean(glm.pred == test.RainTomorrow)
 
 ### Neuronales Netz
 
-x_names = c("Date", "Location", "MinTemp", "MaxTemp", "Rainfall", "Evaporation", "Sunshine", "WindGustDir", "WindGustSpeed", "WindDir9am", "WindDir3pm", "WindSpeed9am", "WindSpeed3pm", "Humidity9am", "Humidity3pm", "Pressure9am", "Pressure3pm", "Cloud9am", "Cloud3pm", "Temp9am", "Temp3pm", "RainToday")
+x_names = c("Date", 
+            "Location", 
+            "MinTemp", 
+            "MaxTemp", 
+            "Rainfall", 
+            "Evaporation", 
+            "Sunshine", 
+            "WindGustDir", 
+            "WindGustSpeed", 
+            "WindDir9am", 
+            "WindDir3pm", 
+            "WindSpeed9am", 
+            "WindSpeed3pm", 
+            "Humidity9am", 
+            "Humidity3pm", 
+            "Pressure9am", 
+            "Pressure3pm", 
+            "Cloud9am", 
+            "Cloud3pm", 
+            "Temp9am", 
+            "Temp3pm", 
+            "RainToday")
 y_names = c("RainTomorrow")
 
 neural_net <- function(
@@ -138,8 +161,25 @@ neural_net <- function(
   return(model)
 }
 
+prep <- function(data, x_rel, y_rel) {
+  x <- model.matrix(
+    gen_model(x_rel, y_rel),
+    c(data[x_rel], data[y_rel])
+  )
+  x <- x[, -1]   # entferne den Intercept
+  y <- as.factor(data[, y_rel])
+  return(c(x = x, y = y))
+}
+
 gen_model <- function(params, y) {
   return(as.formula(paste(paste(y, " ~ "), paste(params, collapse = " + "))))
 }
 
-neural_net(train, x_names, y_names)
+# nn1 <- neural_net(train, x_names, y_names, hiddenlayers = c(2))
+# nn1
+# p <- prep(test, x_names, y_names)
+# prognosen <- predict(nn1, p["x"])$predictions
+# mean(abs(prognosen - p["y"]))
+
+model1 <- randomForest(RainTomorrow ~ ., data = test, importance = TRUE)
+plot(model1)
