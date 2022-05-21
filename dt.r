@@ -1,4 +1,5 @@
 #!/bin/Rscript
+library("doParallel")
 library("R.utils")
 library("dplyr")
 library("plyr")
@@ -12,6 +13,8 @@ library("corrplot")
 library('ANN2')
 library('randomForest')
 library('tree')
+library('caret')
+library('party')
 
 df <- read.csv("./data/weatherAUS.csv", header = TRUE, sep = ",", fill = TRUE)
 
@@ -94,12 +97,18 @@ y_names = c("RainTomorrow")
 ################################ DECISION TREE ################################################
 
 tutData <- train[, !names(train) %in% c("Location","RainToday","Date","WindGustDir","WindDir9am","WindDir3pm")]
-dateLess <- train[, !names(train) %in% c("Date")]
-tre <- ctree(RainTomorrow ~ ., data = tutData)
-png("plot.png", res=35, height=1000, width=32767)
+dateLess <- test[, !names(test) %in% c("Date")]
+nohum <- train[, !names(train) %in% c("Date","Humidity9am","Humidity3pm","Pressure3pm", "Pressure9am","Cloud9am", "Cloud3pm")]
+tre <- ctree(RainTomorrow ~ ., data = nohum)
+png("nohum.png", res=35, height=1000, width=32767)
 plot(tre)
 dev.off()
 
 pred <- predict(tre, test)
 tPred <- table(pred, test$RainTomorrow)
 acc <- (tPred[1,1] + tPred[2,2]) / sum(tPred)
+
+
+rf.cv <- rfcv(trainx = train[, x_names], trainy = train[, y_names], cv.fold = 2)
+summary(rf.cv)
+rf.cv$error.cv
