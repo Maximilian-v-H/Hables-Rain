@@ -60,7 +60,7 @@ dfmin$WindDir3pm
 ### Daten splitten in Test- und Trainingsdatensätze
 
 ## 75% of the sample size
-smp_size <- floor(0.95 * nrow(dfmin))  ## set the seed to make your partition reproducible 
+smp_size <- floor(0.75 * nrow(dfmin))  ## set the seed to make your partition reproducible 
 set.seed(123) 
 train_ind <- sample(seq_len(nrow(dfmin)), size = smp_size)  
 train <- dfmin[train_ind, ] 
@@ -109,6 +109,6 @@ tPred <- table(pred, test$RainTomorrow)
 acc <- (tPred[1,1] + tPred[2,2]) / sum(tPred)
 
 
-rf.cv <- rfcv(trainx = train[, x_names], trainy = train[, y_names], cv.fold = 2)
+rf.cv <- rfcv(trainx = test[, x_names], trainy = test[, y_names], cv.fold = 2, do.trace=TRUE)
 summary(rf.cv)
 rf.cv$error.cv
