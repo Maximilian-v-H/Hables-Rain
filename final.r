@@ -4,7 +4,6 @@ library("R.utils")
 library("dplyr")
 library("plyr")
 library("ggplot2")
-library("dplyr")
 library("broom")
 library("ggpubr")
 library("Amelia")
@@ -16,6 +15,7 @@ library("doParallel")
 library("tree")
 library("caret")
 library("party")
+library("boot")
 
 
 ## DATA CLEANING
@@ -44,10 +44,13 @@ missmap(df, col = c("blue", "red"), main = "2. Wolkenbegrenzung", legend = FALSE
 dfmin <- subset(df, !is.na(df$RainToday) & !is.na(df$RainTomorrow))
 missmap(dfmin, col = c("blue", "red"), main = "3. RainToday und RainTomorrow", legend = FALSE)
 
-parameters <- names(select_if(df, is.numeric))
-
-for (x in parameters) {
-  dfmin[x][is.na(dfmin[x])] <- mean(dfmin[, x], na.rm = TRUE)
+for (x in names(select_if(df, is.numeric))) {
+    if (x == "Cloud9am" || x == "Cloud3pm") {
+        half <- floor(length(dfmin[, x]) / 2)
+        dfmin[0:half, x][is.na(dfmin[0:half, x])] <- floor(mean(dfmin[0:half, x], na.rm = TRUE))
+        dfmin[half:length(dfmin[, x]), x][is.na(dfmin[half:length(dfmin[, x]), x])] <- ceiling(mean(dfmin[half:length(dfmin[, x]), x], na.rm = TRUE))
+    }
+    dfmin[x][is.na(dfmin[x])] <- mean(dfmin[, x], na.rm = TRUE)
 }
 missmap(dfmin, col = c("blue", "red"), main = "4. Mittelwert der numerischen Daten", legend = FALSE)
 
@@ -273,6 +276,7 @@ test <- dfmin[-train_ind, ]
 
 ## LOGISTIC REGRESSION
 
+start <- Sys.time()
 model <- glm(
              RainTomorrow~
                Date +
@@ -300,15 +304,19 @@ model <- glm(
 
 summary(model)
 
+mse <- cv.glm(train, model, K = 10)$delta[1]
+print(mse)
 glm_probs <- predict(model, newdata = test, type = "response")
 glm_probs[1:5]
 
-glm_pred <- ifelse(glm.probs > 0.5, "Yes", "No")
+glm_pred <- ifelse(glm_probs > 0.5, "Yes", "No")
 
 test_raintomorrow <- test$RainTomorrow
 table(glm_pred, test_raintomorrow)
 
 mean(glm_pred == test_raintomorrow)
+end <- Sys.time()
+end - start
 
 ## NEURAL NETWORK
 
@@ -338,8 +346,7 @@ x_names <- c("Date",
             "RainToday")
 y_names <- c("RainTomorrow")
 
-tut_data <- train[, !names(train) %in% c("Location", "RainToday", "Date", "WindGustDir", "WindDir9am", "WindDir3pm")]
-date_less <- test[, !names(test) %in% c("Date")]
+start <- Sys.time()
 nohum <- train[, !names(train) %in% c("Date", "Humidity9am", "Humidity3pm", "Pressure3pm", "Pressure9am", "Cloud9am", "Cloud3pm")]
 tre <- ctree(RainTomorrow ~ ., data = nohum)
 png("nohum.png", res = 35, height = 1000, width = 32767)
@@ -354,3 +361,6 @@ acc <- (t_pred[1, 1] + t_pred[2, 2]) / sum(t_pred)
 rf_cv <- rfcv(trainx = test[, x_names], trainy = test[, y_names], cv.fold = 2, do.trace = TRUE)
 summary(rf_cv)
 rf_cv$error.cv
+end <- Sys.time()
+end - start
+with(rf_cv, plot(n.var, error.cv, log = "x", type = "o", lwd = 2, xlab = "Benutzte Parameter", ylab = "Fehlerrate", main = "Crossvalidation Random forest", color = "steelblue"))
